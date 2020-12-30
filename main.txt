@@ -1,0 +1,100 @@
+function digIt()
+    while turtle.detect() do   
+        turtle.dig()
+        os.sleep(0.5)
+    end
+    turtle.forward()
+    while turtle.detectDown() or turtle.detectUp() do
+        turtle.digUp()
+        turtle.digDown()
+    end
+end
+function placeTorch()
+    turtle.down()
+    turtle.back()
+    turtle.select(16)
+    turtle.place()
+    turtle.up()
+    turtle.forward()
+end
+ 
+function digTunnel(length)
+    for i = 1, length do
+        digIt()
+        turtle.turnLeft()
+        digIt()
+        turtle.turnRight()
+        turtle.turnRight()
+        turtle.forward()
+        digIt()
+        turtle.turnLeft()
+        turtle.turnLeft()
+        turtle.forward()
+        turtle.turnRight()
+        if i % 10 == 5 then
+            turtle.select(16)
+            turtle.placeDown()
+        end
+    end
+end
+ 
+function RightTurn()
+    turtle.turnRight()
+    turtle.forward()
+    digIt()
+    digIt()
+    digIt()
+    turtle.back()
+    turtle.turnRight()
+end
+ 
+function LeftTurn()
+    turtle.turnLeft()
+    turtle.forward()
+    digIt()
+    digIt()
+    digIt()
+    turtle.back()
+    turtle.turnLeft()
+end
+ 
+function Chest(x)
+    turtle.turnLeft()
+    k = 0
+    repeat 
+        turtle.forward()
+        k = k+1
+    until k == x 
+    turtle.turnLeft()
+    local a = 1
+    for a = 1, 15 do
+        turtle.select(a)
+        turtle.dropDown()
+        a = a+1
+    end
+    turtle.select(16)
+    turtle.suck(turtle.getItemSpace())
+    turtle.turnLeft()
+    l = 0
+    repeat 
+        turtle.forward()
+        l = l+1
+    until l == x 
+    turtle.turnLeft()
+end
+ 
+local x = 0
+local run = 0
+term.write("Tunnel length: ")
+run = read()
+term.write("Area width: ")
+width = read()
+ 
+for j = 1, width do 
+    digTunnel(run)
+    RightTurn()
+    digTunnel(run)
+    LeftTurn()
+    x = x+6
+    Chest(x)
+end
