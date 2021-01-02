@@ -1,0 +1,205 @@
+-- Main --
+
+term.write("Please enter desired side length (in 3x3x3 blocks) of quarry: ")
+sideLength = read()
+
+posX = 0
+posY = 0
+dir = 0
+digCount = 0
+
+mine(sideLength)
+
+-- Movement Functions --
+
+function rotLeft()
+	turtle.turnLeft()
+	dir = (dir + 1) % 4 
+end
+
+function rotRight()
+	turtle.turnRight()
+	dir = (dir - 1) % 4 
+end
+
+function rot180()
+	turtle.turnLeft()
+	turtle.turnLeft()
+	dir = (dir + 2) % 4
+end
+
+function rotTo(newDir)
+	nbrLeftRot = (newDir - dir) % 4 
+	if nbrLeftRot == 1 then
+		turtle.rotLeft()
+	elseif nbrLeftRot = 2
+		turtle.rot180()
+	elseif nbrLeftRot = 3
+		turtle.rotRight()
+	end
+end
+
+function goForward(nbrSteps)
+	local dx = 0
+	local dy = 0 
+	if dir == 0 then
+		dx = 1
+	elseif dir == 1 then
+		dy = 1
+	elseif dir = 2 then
+		dx = -1
+	else 
+		dy = -1
+	end
+	for i = 1, nbrSteps do
+		turtle.forward()
+		posX = posX + dx
+		posY = posY + dy
+	end
+end
+
+function goTo(newX, newY, newDir)
+	local dx = newX - posX
+	local dy = newY - posY
+	if dx < 0 then
+		rotTo(2)
+	else
+		rotTo(0)
+	end
+	goForward(abs(dx))
+	
+	if dy < 0 then
+		rotTo(3)
+	else
+		rotTo(1)
+	end
+	goForward(abs(dy))
+	rotTo(newDir)		
+end
+
+-- Digging Functions -- 
+
+function digColumn()
+	turtle.dig()
+	goForward(1)
+	turtle.digUp()
+        turtle.digDown()
+end
+
+function dig3x3()
+	digColumn()
+	rotRight()
+	digColumn()
+	for i = 1, 3 do
+		rotLeft()
+		digColumn()
+		digColumn()
+	end
+	rotLeft()
+	goForward(1)
+	rotLeft()
+	digColumn()
+	digCount = digCount + 1
+	
+	if digCount % 3 == 1 then
+            	turtle.select(16)
+        	turtle.placeDown()
+       	end
+	if digCount >= 5 then
+		local oldX = posX 
+		local oldY = posY 
+		local oldDir = dir
+		depositToChest()
+		goTo(oldX, oldY, oldDir)
+		digCount = 0 
+	end		
+end
+
+function digTunnel(length)
+	for int i = 1, length - 1 then
+		dig3x3()
+		goForward(1)
+	end
+	dig3x3()
+end
+	
+function clear()
+	digColumn()
+	rotLeft()
+	digColumn()
+	for i = 1, 3 do
+		rotLeft()
+		digColumn()
+		digColumn()
+	end
+	for i = 1, 2 do
+		rotLeft()
+		goForward(1)
+	end	
+	rot180()
+	digCount = digCount + 1
+end
+
+fuction mineRing(sideLength)
+	goForward(1 + 3 * (sideLength - (sideLength % 3)))
+	dig3x3()
+	rotLeft()
+	goForward(1)
+	digTunnel((sideLength - 1) / 2)
+	for i = 1, 3 do
+		rotLeft()
+		goForward(1)
+		digTunnel(sideLength - 1)
+	end
+	rotLeft()
+	goForward(1)
+	digTunnel((sideLength - 1) / 2)
+	goTo(0, 0, 0)
+end
+
+function mine(sideLength)
+	if sideLength % 2 == 0 do
+		sideLength = sideLength - 1
+	end
+	clear()
+	for i = 1, (sideLength - 1) do 
+		mineRing(i)
+	end
+end
+
+-- Chest & Return funcs --
+
+function depositToChest()
+	if (abs(posX) == abs(posY)) then 
+		rot180()
+		goForward(3)
+		rotRight()
+	else
+		rotLeft()
+	end
+	goForward(3)
+	goTo(0, 0, 0)
+	emptyStorage()
+	restock()
+end
+
+function emptyInventory()
+	for i = 1, 15
+		turtle.select(i)
+		turtle.dropDown(turtle.getItemSpace())
+	end
+end
+
+function restock()
+	turtle.select(16)
+	turtle.suckUp(turtle.getItemSpace())
+end
+
+-- Math Functions --
+
+function abs(nbr)
+	if nbr < 0 then
+		nbr = nbr * -1
+	end
+	return nbr
+end
